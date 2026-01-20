@@ -1,64 +1,103 @@
-#' Creates gene set from a universe of genes
+#' Run PCA analysis on random gene sets for statistical comparison
 #'
-#' This function creates random gene sets
-#' 
-#' @param universe Gene universe to sample random gene set from
-#' @param psize Number of genes in a gene set
-#' @param n_perm Number of permutations to create a random gene set
-#' (default: 1000)
-#' 
-#' @return Random gene set
-#' @export
-
-create_gene_set <- function(universe,
-                    psize,
-                    n_perm = 1000) {
-    gene_set <- lapply(1:n_perm,
-                    function(x) sample(universe, size = psize, replace = FALSE))
-    return(gene_set)
-}
-
-#' Creates random gene sets and runs PCA analysis on networks for a set of
-#'  random gene sets
+#' This function generates random gene sets of various sizes and performs 
+#' Principal Component Analysis to create a null distribution for comparing
+#' against real pathway PCA results. This enables statistical significance
+#' testing of pathway-specific patterns.
 #'
-#' This function creates random gene sets and runs PCA analysis on a set of
-#' random gene sets
-#' 
-#' @param reg_net Table of network with samples in columns, features in rows
-#' @param edges Table, containing information on "reg" and "tar" of reg_net
-#' @param results_pca_pathways Output result table of pca_pathway function 
-#' @param pathways_list A list of pathways
-#' @param n_perm Number of permutations to create a random gene set
-#' (default: 1000)
-#' @param ncores A number of cores to use (default: 1)
-#' @param scale_data Logical, whether to scale the data (TRUE) or not (FALSE),
-#' Default is TRUE.
-#' @param center_data Logical, whether to center the data (TRUE) or not (FALSE),
-#' Default is TRUE.
-#' 
-#' @return Dataframe with pca results for random gene sets
+#' @param reg_net Numeric matrix with samples in columns and network edges
+#'   (regulators) in rows. Values represent regulatory relationships.
+#' @param edges Data frame containing network edge information with columns
+#'   "reg" (regulator) and "tar" (target).
+#' @param results_pca_pathways Data frame output from pca_pathway function,
+#'   used to determine pathway sizes for random sampling.
+#' @param pathways_list Named list of character vectors containing gene
+#'   identifiers for each pathway.
+#' @param tar_to_rows Named list providing fast lookup from target genes to
+#'   row indices. Created as: split(seq_len(nrow(edges)), edges$tar).
+#' @param n_perm Integer, number of random permutations to generate for each
+#'   pathway size. Default is 1000.
+#' @param ncores Integer, number of CPU cores to use for parallel processing.
+#'   Default is 1.
+#' @param scale_data Logical, whether to scale the data (TRUE) or not (FALSE).
+#'   Default is TRUE. Recommended for different measurement scales.
+#' @param center_data Logical, whether to center the data (TRUE) or not 
+#'   (FALSE). Default is TRUE. Recommended for PCA analysis.
+#'
+#' @return Data frame with the following columns:
+#'   \item{pathway}{Random gene set identifier}
+#'   \item{pc1}{Variance explained by the first principal component (%)}
+#'   \item{n_edges}{Number of network edges used for the gene set}
+#'   \item{pathway_size}{Number of genes in the random gene set}
+#'
+#' @details
+#' The function creates random gene sets matching the sizes of real pathways
+#' and computes PCA for each. This generates a null distribution that can be
+#' used to assess whether real pathways show more coordinated expression
+#' patterns than expected by chance.
+#'
+#' @examples
+#' \dontrun{
+#' # Generate random gene sets and run PCA
+#' random_results <- pca_random(
+#'   reg_net = network_matrix,
+#'   edges = edge_table,
+#'   results_pca_pathways = pathway_pca_results,
+#'   pathways_list = my_pathways,
+#'   tar_to_rows = target_lookup,
+#'   n_perm = 500,
+#'   ncores = 4
+#' )
+#' }
 #' @export
-
-
 pca_random <- function(reg_net,
-                      edges,
-                      results_pca_pathways,
-                      pathways_list,
-                      n_perm = 1000,
-                      ncores = 1,
-                      scale_data = TRUE,
-                      center_data = TRUE) {
+                       edges,
+                       results_pca_pathways,
+                       pathways_list,
+                       tar_to_rows,
+                       n_perm = 1000,
+                       ncores = 1,
+                       scale_data = TRUE,
+                       center_data = TRUE) {
+    # Input validation
+    if (!is.numeric(reg_net) || !is.matrix(reg_net)) {
+        stop("'reg_net' must be a numeric matrix")
+    }
+    if (!is.data.frame(results_pca_pathways)) {
+        stop("'results_pca_pathways' must be a data frame")
+    }    
+    # Extract unique pathway sizes and create gene universe
     pathways_size <- unique(results_pca_pathways$pathway_size)
     universe <- unique(unlist(pathways_list))
-    res_pca_random <- list()
-    for (m in 1:length(pathways_size)) {
+
+    # Pre-allocate result list for efficiency
+    res_pca_random <- vector("list", length(pathways_size))
+    
+    # Generate and analyze random gene sets for each pathway size
+    for (m in seq_along(pathways_size)) {
         psize <- pathways_size[m]
-        cat("Pathways with size", " ", psize, "\n")
-        random_genes <- create_gene_set(universe, psize, n_perm = n_perm)
-        res_pca <- pca_pathway(random_genes, reg_net, edges, ncores,
-                    scale_data = scale_data, center_data = center_data)
+        # Progress indication
+        message("Processing pathways with size: ", psize)
+        # Create random gene sets of current size
+        random_genes <- create_gene_set(
+            universe = universe, 
+            psize = psize, 
+            n_perm = n_perm
+        )
+        # Run PCA analysis on random gene sets
+        res_pca <- pca_pathway(
+            pathways_list = random_genes,
+            reg_net = reg_net,
+            edges = edges,
+            tar_to_rows = tar_to_rows,
+            ncores = ncores,
+            scale_data = scale_data,
+            center_data = center_data
+        )
+        # Store results
         res_pca_random[[m]] <- res_pca
     }
+    # Combine all results into single data frame
     res_pca_random_all <- as.data.frame(do.call("rbind", res_pca_random))
     return(res_pca_random_all)
 }
