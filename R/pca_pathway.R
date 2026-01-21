@@ -1,3 +1,35 @@
+#' Create Target-to-Rows Mapping
+#' 
+#' Creates a named list mapping each unique target node to the row indices 
+#' in the edges data frame where that target appears. This is useful for 
+#' quickly subsetting edges by target node.
+#' 
+#' @param edges A data frame containing network edges with a 'tar' column
+#'              representing target nodes
+#' @return A named list where names are unique target nodes and values are 
+#'         integer vectors of row indices where each target appears
+#' @examples 
+#' # Example edges data frame
+#' edges <- data.frame(
+#'   src = c("A", "B", "C", "A"), 
+#'   tar = c("X", "X", "Y", "Y")
+#' )
+#' target_mapping <- create_target_to_rows_mapping(edges)
+#' # Result: list(X = c(1, 2), Y = c(3, 4))
+create_target_to_rows_mapping <- function(edges) {
+  if (!is.data.frame(edges)) {
+    stop("edges must be a data frame")
+  }
+  if (!"tar" %in% colnames(edges)) {
+    stop("edges must contain a 'tar' column")
+  }
+  
+  tar_to_rows <- split(seq_len(nrow(edges)), edges$tar)
+  return(tar_to_rows)
+}
+
+
+
 #' Run PCA analysis for a list of pathways on network edges
 #'
 #' This function performs Principal Component Analysis (PCA) for multiple 
