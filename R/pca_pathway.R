@@ -120,7 +120,12 @@ pca_pathway <- function(pathways_list,
     }, mc.cores = ncores)
     # Combine results and add metadata
     res <- as.data.frame(do.call("rbind", res))
-    res$pathway <- names(pathways_list)
+    # Handle cases where pathways_list might not have names
+    pathway_names <- names(pathways_list)
+    if (is.null(pathway_names)) {
+        pathway_names <- paste0("pathway_", 1:length(pathways_list))
+    }
+    res$pathway <- pathway_names
     res$pathway_size <- lengths(pathways_list)
     res <- res[, c("pathway", "pc1", "n_edges", "pathway_size")]
     return(res)
