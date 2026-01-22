@@ -89,16 +89,22 @@ pca_random <- function(reg_net,
     }    
     # Extract unique pathway sizes and create gene universe
     pathways_size <- unique(results_pca_pathways$pathway_size)
+    message("The total number of unique pathway sizes to process: ", 
+            length(pathways_size))
     universe <- unique(unlist(pathways_list))
 
     # Pre-allocate result list for efficiency
     res_pca_random <- vector("list", length(pathways_size))
+    total_sizes <- length(pathways_size)
     
     # Generate and analyze random gene sets for each pathway size
     for (m in seq_along(pathways_size)) {
         psize <- pathways_size[m]
-        # Progress indication
-        message("Processing pathways with size: ", psize)
+        # Progress indication with percentage
+        progress_pct <- round((m / total_sizes) * 100, 1)
+        message("Processing pathways with size: ", psize, 
+                " (", m, "/", total_sizes, " - ", progress_pct, "%)")
+        
         # Create random gene sets of current size
         random_genes <- create_gene_set(
             universe = universe, 
@@ -117,6 +123,12 @@ pca_random <- function(reg_net,
         )
         # Store results
         res_pca_random[[m]] <- res_pca
+        
+        # Show completion message for major progress milestones
+        if (m %% max(1, round(total_sizes / 10)) == 0 || m == total_sizes) {
+            completed_pct <- round((m / total_sizes) * 100, 1)
+            message("Completed ", completed_pct, "% of pathway sizes (", m, "/", total_sizes, ")")
+        }
     }
     # Combine all results into single data frame
     res_pca_random_all <- as.data.frame(do.call("rbind", res_pca_random))
