@@ -1,6 +1,6 @@
 Package: PORCUPINE
 Title: Approach to study inter-patient gene regulatory heterogeneity in a population of sample-specific gene regulatory networks.
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person(given = "Tatiana",
            family = "Belova",
@@ -14,9 +14,11 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Config/testthat/edition: 3
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports:
     data.table,
