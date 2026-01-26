@@ -66,10 +66,6 @@ runPORCUPINE <- function(reg_net_file,
     if (!file.exists(pathway_gmt_file)) {
         stop("Pathway GMT file does not exist: ", pathway_gmt_file)
     }
-    if (!dir.exists(res_dir)) {
-        dir.create(res_dir, recursive = TRUE)
-        log_message("Created output directory: ", res_dir)
-    }
     # Setup logging
     if (is.null(log_file)) {
         log_file <- 
@@ -78,18 +74,21 @@ runPORCUPINE <- function(reg_net_file,
                     format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt"))
     }
     
-    # Start logging - capture both console and file output
-    sink(log_file, split = TRUE, append = FALSE)
+    if (!dir.exists(res_dir)) {
+        dir.create(res_dir, recursive = TRUE)
+    }
     
     # Create custom logging function for messages
     log_message <- function(...) {
         msg <- paste0(..., collapse = "")
-        message(msg)  # Display in console
+        cat(msg, "\n")  # Display in console
         cat(msg, "\n", file = log_file, append = TRUE)  # Write to log
     }
     
+    # Initialize log file
+    cat("", file = log_file, append = FALSE)  # Create/clear log file
+    
     on.exit({
-        sink()
         if (exists("start_time")) {
             cat("\nLog file closed at:", format(Sys.time()), "\n",
                 file = log_file, append = TRUE)
@@ -119,6 +118,8 @@ runPORCUPINE <- function(reg_net_file,
     log_message("Step 1/6: Reading network file...")
     reg_net <- read_networks(reg_net_file, 
                 object_name = object_name)
+    log_message("Network dimensions: ", dim(reg_net)[1], " network edges ", 
+            dim(reg_net)[2], " samples")
     # Step 2: Load edges
     log_message("Step 2/6: Reading edges file...")
     edges <- read_edges(edge_file)
