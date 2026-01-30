@@ -44,13 +44,23 @@ read_networks <- function(reg_net_file,
     }
     # Ensure it's a numeric matrix
     if (!is.numeric(net)) {
+        # Store original data to check for NA introduction
+        original_net <- net
+        
         tryCatch({
             net <- as.matrix(net)
-            storage.mode(net) <- "numeric"
+            # Suppress warnings during conversion since we'll check for issues
+            suppressWarnings(storage.mode(net) <- "numeric")
         }, error = function(e) {
             stop("Could not convert network data to numeric matrix: ", 
                  e$message)
         })
+        
+        # Check if NAs were introduced by coercion (outside tryCatch)
+        if (any(is.na(net)) && !any(is.na(original_net))) {
+            stop("Data contains non-numeric values 
+                that cannot be converted to numeric matrix")
+        }
     }
     # Validate dimensions
     if (nrow(net) == 0 || ncol(net) == 0) {
