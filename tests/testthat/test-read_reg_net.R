@@ -116,7 +116,6 @@ test_that("read_networks reads text files correctly", {
     expect_true(is.numeric(result))
     expect_equal(nrow(result), 4)
     expect_equal(ncol(result), 5)
-    
     # Test file with row names in first column
     result_rownames <- read_networks(
         file.path(temp_dir, "network_with_rownames.txt")
@@ -165,7 +164,6 @@ test_that("read_edges reads RData files correctly", {
     expect_s3_class(result, "data.frame")
     expect_true(all(c("reg", "tar") %in% colnames(result)))
     expect_equal(nrow(result), 6)
-    
     # Test auto-detection
     result_auto <- read_edges(file.path(temp_dir, "edges.RData"))
     expect_equal(result, result_auto)
@@ -174,7 +172,6 @@ test_that("read_edges reads RData files correctly", {
 test_that("read_edges validates required columns", {
     temp_dir <- setup_test_files()
     on.exit(unlink(temp_dir, recursive = TRUE))
-    
     expect_error(
         read_edges(file.path(temp_dir, "bad_edges.RData")),
         "Edges file must contain columns 'reg' and 'tar'"
@@ -184,7 +181,6 @@ test_that("read_edges validates required columns", {
 test_that("read_edges reads text files correctly", {
     temp_dir <- setup_test_files()
     on.exit(unlink(temp_dir, recursive = TRUE))
-    
     result <- read_edges(file.path(temp_dir, "edges.txt"))
     expect_s3_class(result, "data.frame")
     expect_true(all(c("reg", "tar") %in% colnames(result)))
@@ -197,7 +193,6 @@ test_that("read_edges handles empty files", {
     write.table(data.frame(reg = character(0), 
         tar = character(0)), temp_file, row.names = FALSE, )
     on.exit(unlink(temp_file))
-    
     expect_error(
         read_edges(temp_file),
         "Edges file is empty"
@@ -223,5 +218,3 @@ test_that("read_networks reads other extensions correctly", {
     expect_equal(nrow(csv_result), 4)
     expect_equal(ncol(csv_result), 5)
 })
-
-
