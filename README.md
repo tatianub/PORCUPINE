@@ -1,4 +1,4 @@
-# PORCUPINE
+# PORCUPINE <img src="logo/PORCUPINE.png" style="height: 1em; vertical-align: middle;">
 **P**rincipal Components Analysis to **O**btain **R**egulatory **C**ontributions **U**sing **P**athway-based Interpretation of **N**etwork **E**stimates is an R package to identify biological pathway which drive inter-tumour heterogeneity in a population of gene regulatory networks. It is a Principal Components Analysis (PCA)-based approach that can be used to determine whether a specific set of variables—for example a set of genes in a specific pathway—have coordinated variability in their regulation.
 
 ## Method
