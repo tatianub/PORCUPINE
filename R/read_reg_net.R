@@ -58,8 +58,8 @@ read_networks <- function(reg_net_file,
         
         # Check if NAs were introduced by coercion (outside tryCatch)
         if (any(is.na(net)) && !any(is.na(original_net))) {
-            stop("Data contains non-numeric values 
-                that cannot be converted to numeric matrix")
+            stop("Data contains non-numeric values that 
+            cannot be converted to numeric matrix")
         }
     }
     # Validate dimensions
