@@ -51,12 +51,6 @@ create_gene_set <- function(universe,
 #'   \item{n_edges}{Number of network edges used for the gene set}
 #'   \item{pathway_size}{Number of genes in the random gene set}
 #'
-#' @details
-#' The function creates random gene sets matching the sizes of real pathways
-#' and computes PCA for each. This generates a null distribution that can be
-#' used to assess whether real pathways show more coordinated expression
-#' patterns than expected by chance.
-#'
 #' @examples
 #' \dontrun{
 #' # Generate random gene sets and run PCA
@@ -86,7 +80,7 @@ pca_random <- function(reg_net,
     }
     if (!is.data.frame(results_pca_pathways)) {
         stop("'results_pca_pathways' must be a data frame")
-    }    
+    }
     # Extract unique pathway sizes and create gene universe
     pathways_size <- unique(results_pca_pathways$pathway_size)
     message("The total number of unique pathway sizes to process: ", 
@@ -96,7 +90,6 @@ pca_random <- function(reg_net,
     # Pre-allocate result list for efficiency
     res_pca_random <- vector("list", length(pathways_size))
     total_sizes <- length(pathways_size)
-    
     # Generate and analyze random gene sets for each pathway size
     for (m in seq_along(pathways_size)) {
         psize <- pathways_size[m]
@@ -104,7 +97,6 @@ pca_random <- function(reg_net,
         progress_pct <- round((m / total_sizes) * 100, 1)
         message("Processing pathways with size: ", psize, 
                 " (", m, "/", total_sizes, " - ", progress_pct, "%)")
-        
         # Create random gene sets of current size
         random_genes <- create_gene_set(
             universe = universe, 
@@ -123,11 +115,11 @@ pca_random <- function(reg_net,
         )
         # Store results
         res_pca_random[[m]] <- res_pca
-        
         # Show completion message for major progress milestones
         if (m %% max(1, round(total_sizes / 10)) == 0 || m == total_sizes) {
             completed_pct <- round((m / total_sizes) * 100, 1)
-            message("Completed ", completed_pct, "% of pathway sizes (", m, "/", total_sizes, ")")
+            message("Completed ", completed_pct,
+                "% of pathway sizes (", m, "/", total_sizes, ")")
         }
     }
     # Combine all results into single data frame
