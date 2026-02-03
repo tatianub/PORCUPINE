@@ -23,7 +23,6 @@ create_target_to_rows_mapping <- function(edges) {
   if (!"tar" %in% colnames(edges)) {
     stop("edges must contain a 'tar' column")
   }
-  
   tar_to_rows <- split(seq_len(nrow(edges)), edges$tar)
   return(tar_to_rows)
 }
@@ -56,12 +55,6 @@ create_target_to_rows_mapping <- function(edges) {
 #'   \item{pc1}{Variance explained by the first principal component (%)}
 #'   \item{n_edges}{Number of network edges used for the pathway}
 #'   \item{pathway_size}{Total number of genes in the pathway}
-#'
-#' @details
-#' The function uses parallel processing via mclapply to efficiently process
-#' multiple pathways. For pathways with fewer than 2 matching edges, NA
-#' values are returned as PCA cannot be computed.
-#'
 #' @examples
 #' \dontrun{
 #' # Example pathway list
