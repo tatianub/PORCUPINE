@@ -1,22 +1,32 @@
-#' Run PCA analysis on the data
+#' Run principal component analysis (PCA)
 #'
-#' This function performs PCA analysis on the data. 
+#' Performs PCA on a numeric matrix and returns the percentage of variance
+#' explained by the first principal component.
 #'
-#' @param data Numeric matrix with samples in columns, and features in rows
-#' @param scale_data Logical, whether to scale the data (TRUE) or not (FALSE).
-#'   Default is TRUE.
-#' @param center_data Logical, whether to center the data (TRUE) or not (FALSE).
-#'   Default is TRUE.
+#' @param data Numeric matrix with samples in columns and features in rows.
+#' @param scale_data Logical; if TRUE, features are scaled to unit variance
+#'   before PCA. Default is TRUE.
+#' @param center_data Logical; if TRUE, features are mean-centered before
+#'   PCA. Default is TRUE.
 #'
-#' @return Data frame with PCA results containing
-#' 
+#' @details
+#' The input matrix is transposed internally so that samples become rows and
+#' features become columns, as expected by the PCA implementation.
+#'
+#' @return A data.frame with two columns:
+#' \describe{
+#'   \item{pc1}{Numeric. Percentage of variance explained by PC1.}
+#'   \item{n_edges}{Integer. Number of features used in the analysis.}
+#' }
+#'
 #' @examples
 #' \dontrun{
 #' data <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' result <- run_pca(data)
+#' run_pca(data)
 #' }
 #'
 #' @export
+#' 
 run_pca <- function(data, 
                     scale_data = TRUE, 
                     center_data = TRUE) {
