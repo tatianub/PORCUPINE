@@ -77,7 +77,6 @@ pca_pathway <- function(pathways_list,
                         reg_net,
                         edges,
                         tar_to_rows,
-                        npcs = 1,
                         ncores = 1,
                         scale_data = TRUE,
                         center_data = TRUE) {
@@ -106,7 +105,6 @@ pca_pathway <- function(pathways_list,
         # Perform PCA analysis
         run_pca(
             subnet,
-            npcs = npcs,
             scale_data = scale_data,
             center_data = center_data
         )
