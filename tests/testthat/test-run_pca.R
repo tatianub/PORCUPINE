@@ -12,6 +12,7 @@ test_that("run_pca validates matrix input correctly", {
 })
 
 test_that("run_pca scaling and centering parameters affect results correctly", {
+    set.seed(42)
     # Create test data with different scales
     test_data <- 
         matrix(rnorm(20 * 20), ncol = 20, nrow = 20)
@@ -29,18 +30,21 @@ test_that("run_pca scaling and centering parameters affect results correctly", {
     expect_false(identical(result_scaled$pc1, result_unscaled$pc1))
 })
 
-test_that("run_pca npcs parameter works correctly", {
-    test_data <- matrix(rnorm(400), nrow = 20, ncol = 20)
-    # Test that different npcs values work (only PC1 is returned)
-    result_1pc <- run_pca(test_data, npcs = 1)
-    result_5pc <- run_pca(test_data, npcs = 5)
-    # Should return same structure regardless of npcs
-    expect_equal(colnames(result_1pc), colnames(result_5pc))
+
+test_that("run_pca errors on zero-variance features when scaling", {
+  set.seed(1)
+  x <- matrix(rnorm(5 * 10), nrow = 5, ncol = 10)
+  x[1, ] <- 1  # feature 1 is constant -> sd = 0
+
+  expect_error(
+    run_pca(x, scale_data = TRUE, center_data = TRUE),
+    "zero-variance"
+  )
 })
 
 test_that("run_pca returns correct output structure", {
     test_data <- matrix(rnorm(400), nrow = 20, ncol = 20)
-    result <- run_pca(test_data, npcs = 1)
+    result <- run_pca(test_data)
     # Check output is data.frame
     expect_s3_class(result, "data.frame")
     # Check required columns
