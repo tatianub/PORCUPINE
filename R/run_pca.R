@@ -7,21 +7,19 @@
 #'   Default is TRUE.
 #' @param center_data Logical, whether to center the data (TRUE) or not (FALSE).
 #'   Default is TRUE.
-#' @param npcs Integer, number of principal components to compute. Default is 1.
 #'
 #' @return Data frame with PCA results containing
 #' 
 #' @examples
 #' \dontrun{
 #' data <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' result <- run_pca(data, npcs = 1)
+#' result <- run_pca(data)
 #' }
 #'
 #' @export
 run_pca <- function(data, 
                     scale_data = TRUE, 
-                    center_data = TRUE, 
-                    npcs = 1) {
+                    center_data = TRUE) {
     # Input validation
     if (!is.numeric(data) || !is.matrix(data)) {
         stop("Input 'data' must be a numeric matrix")
@@ -29,12 +27,19 @@ run_pca <- function(data,
     if (any(is.na(data))) {
         stop("Input data contains NA values.")
     }
+    if (scale_data == TRUE) {
+    # features are rows in `data`
+    sds <- apply(data, 1, stats::sd)
+    if (any(sds == 0)) {
+        stop("Input data contains zero-variance features; cannot scale.")
+    }
+    }
     # Transpose data for PCA (samples as rows, features as columns)
     data_t <- t(data)
     # Perform PCA using irlba
     res_pca <- irlba::prcomp_irlba(
         data_t, 
-        n = npcs,
+        n = 1,
         scale. = scale_data,
         center = center_data
     )
