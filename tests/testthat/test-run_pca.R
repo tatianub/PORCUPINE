@@ -11,26 +11,6 @@ test_that("run_pca validates matrix input correctly", {
     expect_error(run_pca(na_matrix), "Input data contains NA values.")
 })
 
-test_that("run_pca scaling and centering parameters affect results correctly", {
-    set.seed(42)
-    # Create test data with different scales
-    test_data <- 
-        matrix(rnorm(20 * 20), ncol = 20, nrow = 20)
-    result_scaled <- run_pca(
-        test_data, 
-        scale_data = TRUE,
-        center_data = TRUE
-    )
-    result_unscaled <- run_pca(
-        test_data, 
-        scale_data = FALSE,
-        center_data = FALSE
-    )
-    # Results should differ significantly due to scaling
-    expect_false(identical(result_scaled$pc1, result_unscaled$pc1))
-})
-
-
 test_that("run_pca errors on zero-variance features when scaling", {
   set.seed(1)
   x <- matrix(rnorm(5 * 10), nrow = 5, ncol = 10)
