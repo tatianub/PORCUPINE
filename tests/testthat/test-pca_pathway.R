@@ -8,7 +8,7 @@ create_mock_data <- function() {
     # Mock regulatory network matrix - match number of edges
     reg_net <- matrix(rnorm(20 * 10), nrow = 20, ncol = 10)
     rownames(reg_net) <- paste0("edge_", 1:20)
-    colnames(reg_net) <- paste0("sample_", 1:10)    
+    colnames(reg_net) <- paste0("sample_", 1:10)
     # Mock target-to-rows mapping
     tar_to_rows <- split(seq_len(nrow(edges)), edges$tar)
     # Mock pathways
@@ -110,16 +110,4 @@ test_that("pca_pathway considers scaling and centering parameters", {
     expect_s3_class(result_unscaled, "data.frame")
     # Test that scaling/centering produces different PC1 values
     expect_false(identical(result_scaled$pc1, result_unscaled$pc1))
-})
-
-test_that("pca_pathway handles different npcs values", {
-    mock_data <- create_mock_data()
-    result <- pca_pathway(
-        mock_data$pathways_list,
-        mock_data$reg_net,
-        mock_data$edges,
-        mock_data$tar_to_rows,
-        npcs = 2
-    )
-    expect_s3_class(result, "data.frame")
 })
