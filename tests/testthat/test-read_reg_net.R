@@ -1,11 +1,8 @@
 # Helper functions to create test files
 setup_test_files <- function() {
-    # Use testthat's standard test data directory
-    test_dir <- file.path("tests/testdata")
-    # Create directory if it doesn't exist
-    if (!dir.exists(test_dir)) {
-        dir.create(test_dir, recursive = TRUE)
-    }
+    # Create a unique temporary directory path
+    test_dir <- tempfile(pattern = "test_porcupine_")
+    dir.create(test_dir, recursive = TRUE)
     # Create test data
     test_matrix <- matrix(rnorm(20), nrow = 4, ncol = 5)
     rownames(test_matrix) <- paste0("gene_", 1:4)
@@ -74,6 +71,7 @@ test_that("read_networks handles unsupported file formats", {
 
 test_that("read_networks reads RData files correctly", {
     temp_dir <- setup_test_files()
+    on.exit(unlink(temp_dir, recursive = TRUE))
     # Test with specific object name
     result <- read_networks(
         file.path(temp_dir, "network.RData"),
@@ -131,8 +129,7 @@ test_that("read_networks handles data conversion", {
     # Test non-convertible data throws error
     expect_error(
         read_networks(file.path(temp_dir, "non_numeric.txt")),
-        "Data contains non-numeric values that 
-            cannot be converted to numeric matrix"
+        "Data contains non-numeric values that cannot be converted to numeric matrix"
     )
 })
 
@@ -201,6 +198,7 @@ test_that("read_edges handles empty files", {
 
 test_that("read_networks reads other extensions correctly", {
      temp_dir <- setup_test_files()
+     on.exit(unlink(temp_dir, recursive = TRUE))
      # Test .tsv extension
     tsv_result <- read_networks(
         file.path(temp_dir, "network.tsv")
@@ -218,3 +216,5 @@ test_that("read_networks reads other extensions correctly", {
     expect_equal(nrow(csv_result), 4)
     expect_equal(ncol(csv_result), 5)
 })
+
+
