@@ -1,11 +1,7 @@
 test_that("runPORCUPINE completes full pipeline with minimal data", {
     # Create temporary test directory
-    test_dir <- "tests/testdata"
-    
-    if (!dir.exists(test_dir)) {
-        dir.create(test_dir, recursive = TRUE)
-    }
-    on.exit(unlink(test_dir, recursive = TRUE))
+    test_dir <- tempfile(pattern = "test_porcupine_")
+    dir.create(test_dir, recursive = TRUE)
     # Create test network data - regulators x samples
 
     reg_net <- matrix(rnorm(1500), nrow = 30, ncol = 50)
